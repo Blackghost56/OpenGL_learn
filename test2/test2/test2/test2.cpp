@@ -14,6 +14,8 @@ int	flag = 0;
 DWORD time = 0;
 int count_frame = 0;
 std::string count_frame_str = "";
+int h, w;
+
 
 void renderBitmapString(float x, float y, float z, void *font, std::string &string)
 {
@@ -26,13 +28,15 @@ void renderBitmapString(float x, float y, float z, void *font, std::string &stri
 }
 
 
-void changeSize(int w, int h) {
-
+void changeSize(int ww, int hh) {
+	
+	h = hh;
+	w = ww;
 	// предупредим деление на ноль
 	// если окно сильно перетянуто будет
-	if (h == 0)
-		h = 1;
-	float ratio = 1.0* w / h;
+	if (hh == 0)
+		hh = 1;
+	float ratio = 1.0* ww / hh;
 
 	// используем матрицу проекции
 	glMatrixMode(GL_PROJECTION);
@@ -41,7 +45,7 @@ void changeSize(int w, int h) {
 	glLoadIdentity();
 
 	// определяем окно просмотра
-	glViewport(0, 0, w, h);
+	glViewport(0, 0, ww, hh);
 
 	// установить корректную перспективу.
 	gluPerspective(45, ratio, 1, 1000);
@@ -57,10 +61,32 @@ void changeSize(int w, int h) {
 
 }
 
+
+void setOrthographicProjection() {
+	//переключения режима проецирования
+	glMatrixMode(GL_PROJECTION);
+	//Сохраняем предыдущую матрицу, которая содержит
+		//параметры перспективной проекции
+	glPushMatrix();
+	//обнуляем матрицу
+	glLoadIdentity();
+	//устанавливаем 2D ортографическую проекцию
+	gluOrtho2D(0, w, 0, h);
+	//перевернём ось y, положительное направление вниз
+	glScalef(1, -1, 1);
+	// Движение происходит из левого нижнего угла
+	// В верхний левый угол
+	glTranslatef(0, -h, 0);
+	// возврата в режим обзора модели
+	glMatrixMode(GL_MODELVIEW);
+}
+
+
 void renderScene(void) {
 
 	static float angle;
 
+	// FPS
 	count_frame++;
 	if (((GetTickCount() - time) / 1000.0) >= 1.0)
 	{
@@ -68,6 +94,7 @@ void renderScene(void) {
 		time = GetTickCount();
 		count_frame = 0;
 	}
+	// --------------
 
 
 	glLoadIdentity();
@@ -76,20 +103,42 @@ void renderScene(void) {
 		0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f);
 
-	glRotatef(angle, 0.0f, 1.0f, 0.0f);
 
+	glRotatef(0.0, 0.0f, 1.0f, 0.0f);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glBegin(GL_TRIANGLES);
+	glBegin(GL_QUADS);
 
+	glColor3f(0.5, 0.5, 0.5);
+	glVertex3f(1.0, 0.0, 0.0);
+
+	glColor3f(0.5, 0.5, 0.5);
+	glVertex3f(2.0, 0.0, 0);
+
+	glColor3f(0.5, 0.5, 0.5);
+	glVertex3f(2.0, 1.0, 0);
+
+	glColor3f(0.5, 0.5, 0.5);
+	glVertex3f(1.0, 1.0, 0);
+
+	glEnd();
+
+	std::string start_str = "Start";
+
+	glColor3f(1.0, 1.0, 1.0);
+	renderBitmapString(1.5, 0.5, 0.0, GLUT_BITMAP_TIMES_ROMAN_24, start_str);		//Start
+
+
+	glRotatef(angle, 0.0f, 1.0f, 0.0f);
+
+	glBegin(GL_TRIANGLES);
 
 	//glColor3f(1.0, 0.0, 0.0);		// red
 	glColor3fv(array_color[flag]);
 	glVertex3f(-0.5, -0.5, 0);
 
 	//glColor3f(0.0, 1.0, 0.0);		// green
-
 	glColor3fv(array_color[(flag + 1) % 3]);
 	glVertex3f(0.0, 0.5, 0);
 
@@ -98,6 +147,7 @@ void renderScene(void) {
 	glVertex3f(0.5, -0.5, 0);
 
 	glEnd();
+
 
 	angle += 0.1f;
 
@@ -134,6 +184,17 @@ void processSpecialKeys(int key, int x, int y) {
 }
 
 
+void mouseButton(int button, int state, int x, int y) {
+ 
+	// только при начале движения, если нажата левая кнопка
+	if (button == GLUT_LEFT_BUTTON) {
+ 
+		// когда кнопка отпущена
+		if (state == GLUT_DOWN) {
+			count_frame_str = "x= " + std::to_string(x) + "   y= " + std::to_string(y);
+		}
+	}
+}
 
 
 int main(int argc, char **argv) {
@@ -145,7 +206,7 @@ int main(int argc, char **argv) {
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(200, 200);
 	glutInitWindowSize(500, 500);
-	glutCreateWindow("Test_1");
+	glutCreateWindow("Test_2");
 
 	//glClearColor(1, 1, 1, 1);  //фон
 
@@ -158,10 +219,12 @@ int main(int argc, char **argv) {
 	// новая функция для регистрации
 	glutIdleFunc(renderScene);
 
+	// Keyboard
 	glutKeyboardFunc(processNormalKeys);
 	glutSpecialFunc(processSpecialKeys);
 
-
+	// Mouse
+	glutMouseFunc(mouseButton);
 
 
 	// Основной цикл GLUT
