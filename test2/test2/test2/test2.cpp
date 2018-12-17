@@ -25,6 +25,8 @@ GLdouble projection[16];
 GLdouble wx, wy, wz;
 
 GLfloat zval;
+int flag_2 = 0;
+int g_x, g_y;
 
 
 void renderBitmapString(float x, float y, float z, void *font, std::string &string)
@@ -72,91 +74,103 @@ void changeSize(int ww, int hh) {
 }
 
 
+void setOrthographicProjection(int w_down, int w_up, int h_down, int h_up) {
+	//переключения режима проецирования
+	glMatrixMode(GL_PROJECTION);
+	//Сохраняем предыдущую матрицу, которая содержит
+		//параметры перспективной проекции
+	glPushMatrix();
+	//обнуляем матрицу
+	glLoadIdentity();
+	//устанавливаем 2D ортогональную проекцию
+	gluOrtho2D(w_down, w_up, h_down, h_up);
+	// возврата в режим обзора модели
+	glMatrixMode(GL_MODELVIEW);
+}
+
+
+void restorePerspectiveProjection() {
+	glMatrixMode(GL_PROJECTION);
+	//восстановить предыдущую матрицу проекции
+	glPopMatrix();
+	//вернуться в режим модели
+	glMatrixMode(GL_MODELVIEW);
+}
+
+GLfloat Quad_Coords[] = {
+	1.0f, 0.0f,		// Нижний левый угол 
+	2.0f, 0.0f,		// Нижний правый угол
+	2.0f, 1.0f,		// Верхний правый угол 
+	1.0f, 1.0f		// Верхний левый угол
+};
+
 void renderScene(void) {
 
 	static float angle;
 
-	// FPS
-	count_frame++;
-	if (((GetTickCount() - time) / 1000.0) >= 1.0)
-	{
-		count_frame_str = "FPS: " + std::to_string(count_frame);
-		time = GetTickCount();
-		count_frame = 0;
-		//std::cout << count_frame_str << std::endl;
-	}
-	// --------------
-
-
 	glLoadIdentity();
 
-	// Преобразование кординат из глобальных в экранные
-/*
-glGetIntegerv(GL_VIEWPORT, viewport);
-glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-glGetDoublev(GL_PROJECTION_MATRIX, projection);
-gluProject(1.0, 0.0, 0.0, modelview, projection, viewport, &wx, &wy, &wz);
-*/
-//
-// 
-	/* Из экранных в глобальные
-	glGetIntegerv(GL_VIEWPORT, viewport);
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-
-	glReadPixels(371, 250, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &zval);
-
-	gluUnProject(371, 250, zval, modelview, projection, viewport, &wx, &wy, &wz);
-	*/
-	//
-
-
-
 	// установка камеры
-	gluLookAt(0.0f, 0.0f, 5.0f,
-		0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f);
-
+	gluLookAt(0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glBegin(GL_QUADS);
-	
+	glBegin(GL_QUADS);	
 	glColor3f(0.5, 0.5, 0.5);
-
 	glVertex3f(1.0, 0.0, 0.0);
 	glVertex3f(2.0, 0.0, 0);
 	glVertex3f(2.0, 1.0, 0);
 	glVertex3f(1.0, 1.0, 0);
-	
 	glEnd();
 
+	/*
 	std::string start_str = "Start";
 
 	glColor3f(1.0, 1.0, 1.0);
 	renderBitmapString(1.5, 0.5, 0.0, GLUT_BITMAP_TIMES_ROMAN_24, start_str);		//Start
-
-
+	*/
+	
 	glRotatef(angle, 0.0f, 1.0f, 0.0f);
 
 	glBegin(GL_TRIANGLES);
-
-	//glColor3f(1.0, 0.0, 0.0);		// red
 	glColor3fv(array_color[flag]);
 	glVertex3f(-0.5, -0.5, 0);
-
-	//glColor3f(0.0, 1.0, 0.0);		// green
 	glColor3fv(array_color[(flag + 1) % 3]);
 	glVertex3f(0.0, 0.5, 0);
-
-	//glColor3f(0.0, 0.0, 1.0);		// blue
 	glColor3fv(array_color[(flag + 2) % 3]);
 	glVertex3f(0.5, -0.5, 0);
-
 	glEnd();
+	
 
+	// ------------------------------------
+	setOrthographicProjection(-1, 1, -1, 1); 
+	glPushMatrix();
+	glLoadIdentity();
 
+	if (flag_2 == 1)
+	{	
+		flag_2 = 0;
+		GLfloat zv = 0;
 
+		glReadPixels(g_x, g_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &zv);
+
+		std::cout << "x= " + std::to_string(g_x) + "   y= " + std::to_string(g_y) + "   z= " + std::to_string(zv) + "\t\t\t window" << std::endl;
+
+		glGetIntegerv(GL_VIEWPORT, viewport);
+		glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+		glGetDoublev(GL_PROJECTION_MATRIX, projection);
+
+		gluUnProject(g_x, g_y, zv, modelview, projection, viewport, &wx, &wy, &wz);
+		std::cout << "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t windows to global" << std::endl;
+
+		gluProject(wx, wy, wz, modelview, projection, viewport, &wx, &wy, &wz);
+		std::cout << "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t global to windows" << std::endl;	
+		std::cout << "___________________________________________________________" << std::endl;
+	}
+
+	glPopMatrix();
+	restorePerspectiveProjection(); 
+	//-----------------------------------
 
 	angle += 0.1f;
 
@@ -165,8 +179,26 @@ gluProject(1.0, 0.0, 0.0, modelview, projection, viewport, &wx, &wy, &wz);
 		angle = 0.0;
 	}
 
+		
+	// FPS --------------
+	DWORD delta_t_s = (GetTickCount() - time) / 1000.0;
 
-	renderBitmapString(0.0, -1.0, 0.0, GLUT_BITMAP_TIMES_ROMAN_10, count_frame_str);		//FPS
+	count_frame++;
+	if (delta_t_s >= 1.0)
+	{
+		count_frame_str = "FPS: " + std::to_string((double)count_frame / delta_t_s);
+		time = GetTickCount();
+		count_frame = 0;
+	}
+	setOrthographicProjection(0, w, 0, h); 
+	glPushMatrix();
+	glLoadIdentity();
+	renderBitmapString(10.0, 10.0, 0.0, GLUT_BITMAP_TIMES_ROMAN_10, count_frame_str);		//FPS
+	glPopMatrix();
+	restorePerspectiveProjection();
+	// --------------
+
+	
 
 	glutSwapBuffers();
 }
@@ -193,39 +225,28 @@ void processSpecialKeys(int key, int x, int y) {
 }
 
 
-
-
-
 void mouseButton(int button, int state, int x, int y) {
  
 	// только при начале движения, если нажата левая кнопка
 	if (button == GLUT_LEFT_BUTTON) {
 		if (state == GLUT_DOWN) {
 			//count_frame_str = "x= " + std::to_string(x) + "   y= " + std::to_string(y);
-			std::cout << "x= " + std::to_string(x) + "   y= " + std::to_string(y) << std::endl;
+			
+			flag_2 = 1;
+			g_x = x;
+			g_y = y;
+			
 		}
 	}
 
 	if (button == GLUT_RIGHT_BUTTON) {
 		if (state == GLUT_DOWN) {
 
-			//glPushMatrix();
-			glLoadIdentity();
-			glGetIntegerv(GL_VIEWPORT, viewport);
-			glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-			glGetDoublev(GL_PROJECTION_MATRIX, projection);
-			//glPopMatrix();
-
-			glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &zval);
-
-			gluUnProject(x, y, zval, modelview, projection, viewport, &wx, &wy, &wz);
-
-			std::cout << "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) << std::endl;
-
-			//std::cout << "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) << std::endl;
+			
 		}
 	}
 }
+
 
 void Timer(int)
 {
