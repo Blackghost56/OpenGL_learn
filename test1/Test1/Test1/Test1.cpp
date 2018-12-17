@@ -61,7 +61,7 @@ void changeSize(int ww, int hh) {
 	glViewport(0, 0, ww, hh);
 
 	// установить корректную перспективу.
-	gluPerspective(45, ratio, 1, 100);
+	gluPerspective(45, ratio, 1, 10);
 
 	// вернуться к модели
 	glMatrixMode(GL_MODELVIEW);
@@ -121,6 +121,8 @@ GLfloat Quad_Coords[] = {
 
 void renderScene(void) {
 
+	glEnable(GL_DEPTH_TEST);
+	
 	static float angle;
 
 	glLoadIdentity();
@@ -156,6 +158,8 @@ void renderScene(void) {
 	glVertex3f(0.5, -0.5, 0);
 	glEnd();
 	
+	//glutWireCone(1, 1, 20, 1);
+	glutSolidCone(1, 1, 20, 1);
 
 	// ------------------------------------
 	//setOrthographicProjection2D(-1, 1, -1, 1); 
