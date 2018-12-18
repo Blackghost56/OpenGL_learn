@@ -7,6 +7,7 @@
 #include <Windows.h>
 #include <string>
 #include <iostream>
+#include <vector>
 
 
 float array_color[3][3] = { { 1.0, 0.0, 0.0 }, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0} };
@@ -23,10 +24,16 @@ GLdouble modelview[16];
 GLdouble projection[16];
 
 GLdouble wx, wy, wz;
+GLdouble wx_1, wy_1, wz_1;
 
 GLfloat zval;
 int flag_2 = 0;
 int g_x, g_y;
+
+GLfloat zv = 0;
+
+std::string s_1, s_2, s_3, s_4;
+//std::vector<std::string> str;
 
 
 void renderBitmapString(float x, float y, float z, void *font, std::string &string)
@@ -41,7 +48,7 @@ void renderBitmapString(float x, float y, float z, void *font, std::string &stri
 
 
 void changeSize(int ww, int hh) {
-	
+
 	h = hh;
 	w = ww;
 	// предупредим деление на ноль
@@ -60,7 +67,7 @@ void changeSize(int ww, int hh) {
 	glViewport(0, 0, ww, hh);
 
 	// установить корректную перспективу.
-	gluPerspective(45, ratio, 1, 100);
+	gluPerspective(45, ratio, 1, 10);
 
 	// вернуться к модели
 	glMatrixMode(GL_MODELVIEW);
@@ -74,7 +81,21 @@ void changeSize(int ww, int hh) {
 }
 
 
-void setOrthographicProjection(int w_down, int w_up, int h_down, int h_up) {
+void setOrthographicProjection3D(int left, int right, int bottom, int top, int o_near, int o_far) {
+	//переключения режима проецирования
+	glMatrixMode(GL_PROJECTION);
+	//Сохраняем предыдущую матрицу, которая содержит
+	//параметры перспективной проекции
+	glPushMatrix();
+	//обнуляем матрицу
+	glLoadIdentity();
+	//устанавливаем 2D ортогональную проекцию
+	glOrtho(left, right, bottom, top, o_near, o_far);
+	// возврата в режим обзора модели
+	glMatrixMode(GL_MODELVIEW);
+}
+
+void setOrthographicProjection2D(int w_down, int w_up, int h_down, int h_up) {
 	//переключения режима проецирования
 	glMatrixMode(GL_PROJECTION);
 	//Сохраняем предыдущую матрицу, которая содержит
@@ -97,41 +118,49 @@ void restorePerspectiveProjection() {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-GLfloat Quad_Coords[] = {
-	1.0f, 0.0f,		// Нижний левый угол 
-	2.0f, 0.0f,		// Нижний правый угол
-	2.0f, 1.0f,		// Верхний правый угол 
-	1.0f, 1.0f		// Верхний левый угол
+GLfloat cord_q[] = {
+	0.0, 0.0, 
+	1.0, 0.0,
+	1.0, 1.0,
+	0.0, 1.0
 };
 
+
 void renderScene(void) {
+
+	
 
 	static float angle;
 
 	glLoadIdentity();
+	
 
 	// установка камеры
 	gluLookAt(0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 
+	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
 
-	glBegin(GL_QUADS);	
+	glPushMatrix();
+	//glLoadIdentity();
 	glColor3f(0.5, 0.5, 0.5);
+	glTranslated(1.0, 0.0, 0.0);
+	glVertexPointer(2, GL_FLOAT, 0, cord_q);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glDrawArrays(GL_POLYGON, 0, 4);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	/*glBegin(GL_QUADS);
 	glVertex3f(1.0, 0.0, 0.0);
 	glVertex3f(2.0, 0.0, 0);
 	glVertex3f(2.0, 1.0, 0);
 	glVertex3f(1.0, 1.0, 0);
-	glEnd();
+	glEnd();*/
+	glPopMatrix();
 
+
+	//glRotatef(angle, 0.0f, 1.0f, 0.0f);
 	/*
-	std::string start_str = "Start";
-
-	glColor3f(1.0, 1.0, 1.0);
-	renderBitmapString(1.5, 0.5, 0.0, GLUT_BITMAP_TIMES_ROMAN_24, start_str);		//Start
-	*/
-	
-	glRotatef(angle, 0.0f, 1.0f, 0.0f);
-
 	glBegin(GL_TRIANGLES);
 	glColor3fv(array_color[flag]);
 	glVertex3f(-0.5, -0.5, 0);
@@ -140,38 +169,37 @@ void renderScene(void) {
 	glColor3fv(array_color[(flag + 2) % 3]);
 	glVertex3f(0.5, -0.5, 0);
 	glEnd();
+	*/
+
 	
+	glRotatef(angle, 0.0f, 1.0f, 0.0f);
+	glColor3f(0.5, 0.7, 0.5);
+	glTranslated(0.0, -0.5, 0.0);
+	//glutWireCone(1, 1, 20, 1);
+	glutSolidCone(0.5, 1.5, 40, 1);
+	
+	
+	//glFlush();
 
 	// ------------------------------------
-	setOrthographicProjection(-1, 1, -1, 1); 
+	//setOrthographicProjection2D(-1, 1, -1, 1); 
+	setOrthographicProjection3D(-1, 1, -1, 1, 0, -1);
 	glPushMatrix();
 	glLoadIdentity();
+	//glScalef(1, -1, 1);
 
-	if (flag_2 == 1)
-	{	
-		flag_2 = 0;
-		GLfloat zv = 0;
+	glReadPixels(g_x, h - g_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &zv);
+	
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+	glGetDoublev(GL_PROJECTION_MATRIX, projection);
 
-		glReadPixels(g_x, g_y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &zv);
-
-		std::cout << "x= " + std::to_string(g_x) + "   y= " + std::to_string(g_y) + "   z= " + std::to_string(zv) + "\t\t\t window" << std::endl;
-
-		glGetIntegerv(GL_VIEWPORT, viewport);
-		glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-		glGetDoublev(GL_PROJECTION_MATRIX, projection);
-
-		gluUnProject(g_x, g_y, zv, modelview, projection, viewport, &wx, &wy, &wz);
-		std::cout << "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t windows to global" << std::endl;
-
-		gluProject(wx, wy, wz, modelview, projection, viewport, &wx, &wy, &wz);
-		std::cout << "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t global to windows" << std::endl;	
-		std::cout << "___________________________________________________________" << std::endl;
-	}
-
+	gluUnProject(g_x, g_y, zv, modelview, projection, viewport, &wx, &wy, &wz);
+	gluProject(wx, wy, wz, modelview, projection, viewport, &wx_1, &wy_1, &wz_1);
 	glPopMatrix();
-	restorePerspectiveProjection(); 
-	//-----------------------------------
+	restorePerspectiveProjection();
 
+	
 	angle += 0.1f;
 
 	if (angle >= 360.0)
@@ -179,7 +207,6 @@ void renderScene(void) {
 		angle = 0.0;
 	}
 
-		
 	// FPS --------------
 	DWORD delta_t_s = (GetTickCount() - time) / 1000.0;
 
@@ -190,15 +217,24 @@ void renderScene(void) {
 		time = GetTickCount();
 		count_frame = 0;
 	}
-	setOrthographicProjection(0, w, 0, h); 
+	setOrthographicProjection2D(0, w, 0, h);
 	glPushMatrix();
 	glLoadIdentity();
 	renderBitmapString(10.0, 10.0, 0.0, GLUT_BITMAP_TIMES_ROMAN_10, count_frame_str);		//FPS
+
+	s_1 = "x= " + std::to_string(g_x) + "   y= " + std::to_string(g_y) + "   z= " + std::to_string(zv) + "\t\t\t window\n";
+	s_2 = "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t windows to global\n";
+	s_3 = "x= " + std::to_string(wx_1) + "   y= " + std::to_string(wy_1) + "   z= " + std::to_string(wz_1) + "\t global to windows\n";
+	s_4 = std::to_string(zv);
+
+	renderBitmapString(10.0, 25.0, 0.0, GLUT_BITMAP_TIMES_ROMAN_10, s_3);
+	renderBitmapString(10.0, 40.0, 0.0, GLUT_BITMAP_TIMES_ROMAN_10, s_2);
+	renderBitmapString(10.0, 55.0, 0.0, GLUT_BITMAP_TIMES_ROMAN_10, s_1);
+	renderBitmapString(10.0, 70.0, 0.0, GLUT_BITMAP_TIMES_ROMAN_10, s_4);
+
 	glPopMatrix();
 	restorePerspectiveProjection();
 	// --------------
-
-	
 
 	glutSwapBuffers();
 }
@@ -226,25 +262,68 @@ void processSpecialKeys(int key, int x, int y) {
 
 
 void mouseButton(int button, int state, int x, int y) {
- 
+
 	// только при начале движения, если нажата левая кнопка
 	if (button == GLUT_LEFT_BUTTON) {
 		if (state == GLUT_DOWN) {
 			//count_frame_str = "x= " + std::to_string(x) + "   y= " + std::to_string(y);
-			
+
 			flag_2 = 1;
 			g_x = x;
 			g_y = y;
-			
+
 		}
 	}
-
 	if (button == GLUT_RIGHT_BUTTON) {
 		if (state == GLUT_DOWN) {
 
-			
 		}
 	}
+}
+
+void mouse(int x, int y)
+{
+	g_x = x;
+	g_y = y;
+
+	/*
+	for (auto i : str)
+	{
+		i = "";
+	}
+	*/
+	/*
+	// ------------------------------------
+	//setOrthographicProjection2D(-1, 1, -1, 1); 
+	setOrthographicProjection3D(-1, 1, -1, 1, 0, 100);
+	glPushMatrix();
+	glLoadIdentity();
+
+
+	//GLfloat zv = 0;
+
+
+	
+
+	//s_1 = "x= " + std::to_string(x) + "   y= " + std::to_string(y) + "   z= " + std::to_string(zv) + "\t\t\t window\n";
+	//str.push_back("x= " + std::to_string(x) + "   y= " + std::to_string(y) + "   z= " + std::to_string(zv) + "\t\t\t window\n");
+
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+	glGetDoublev(GL_PROJECTION_MATRIX, projection);
+
+	gluUnProject(x, y, zv, modelview, projection, viewport, &wx, &wy, &wz);
+	//s_2 = "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t windows to global\n";
+	//str.push_back("x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t windows to global\n");
+
+	gluProject(wx, wy, wz, modelview, projection, viewport, &wx, &wy, &wz);
+	//s_3 = "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t global to windows\n";
+	//str.push_back("x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t global to windows\n");
+
+	glPopMatrix();
+	restorePerspectiveProjection();
+	//-----------------------------------	
+	*/
 }
 
 
@@ -255,6 +334,10 @@ void Timer(int)
 	glutTimerFunc(40, Timer, 0);
 }
 
+float ambient[] = { 0.3, 0.3, 0.3, 1.0 };
+float diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
+float black[] = { 0.0, 0.0, 0.0, 1.0 };
+float lpos[] = { 0.0, 0.0 , 1.0, 0.0 };
 
 int main(int argc, char **argv) {
 
@@ -264,8 +347,6 @@ int main(int argc, char **argv) {
 	glutInitWindowPosition(800, 200);
 	glutInitWindowSize(500, 500);
 	glutCreateWindow("Test_2");
-
-	//glClearColor(1, 1, 1, 1);  //фон
 
 	// регистрация обратных вызовов
 	glutDisplayFunc(renderScene);
@@ -278,12 +359,29 @@ int main(int argc, char **argv) {
 
 	//glutTimerFunc(40, Timer, 0);//анимация таймер ф-я нужна в милисек.
 
+	//фон
+	glClearColor(1, 1, 1, 1);
+
+	// Освещение
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+	glLightfv(GL_LIGHT0, GL_POSITION, lpos);
+	glEnable(GL_COLOR_MATERIAL);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);//один источник света
+	/*glLightModelfv(GL_LIGHT_MODEL_AMBIENT, black);//убираем рассеянный свет
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);//тусклый рассеянный свет
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);//диффузный белый 
+	glLightfv(GL_LIGHT0, GL_POSITION, lpos);//расположен в точке lpos
+	glEnable(GL_COLOR_MATERIAL);//освещаем окрашенный предмет без текстур
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);//спереди и сзади, ведь предмет анимированый, потом указываем, что свет и диффузный и рассеянный
+	*/
 	// Keyboard
 	glutKeyboardFunc(processNormalKeys);
 	glutSpecialFunc(processSpecialKeys);
 
 	// Mouse
 	glutMouseFunc(mouseButton);
+	glutPassiveMotionFunc(mouse);
 
 
 	// Основной цикл GLUT
