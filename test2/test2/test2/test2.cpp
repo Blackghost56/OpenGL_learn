@@ -181,7 +181,7 @@ void renderScene(void) {
 	
 	//glFlush();
 
-	// ------------------------------------
+	// Cord 
 	//setOrthographicProjection2D(-1, 1, -1, 1); 
 	setOrthographicProjection3D(-1, 1, -1, 1, 0, -1);
 	glPushMatrix();
@@ -198,6 +198,13 @@ void renderScene(void) {
 	gluProject(wx, wy, wz, modelview, projection, viewport, &wx_1, &wy_1, &wz_1);
 	glPopMatrix();
 	restorePerspectiveProjection();
+
+	s_1 = "x= " + std::to_string(g_x) + "   y= " + std::to_string(g_y) + "   z= " + std::to_string(zv) + "\t\t\t window\n";
+	s_2 = "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t windows to global\n";
+	s_3 = "x= " + std::to_string(wx_1) + "   y= " + std::to_string(wy_1) + "   z= " + std::to_string(wz_1) + "\t global to windows\n";
+	s_4 = std::to_string(zv);
+	// --------------
+
 
 	
 	angle += 0.1f;
@@ -217,16 +224,14 @@ void renderScene(void) {
 		time = GetTickCount();
 		count_frame = 0;
 	}
+	// --------------
+
+	// Text out
 	setOrthographicProjection2D(0, w, 0, h);
 	glPushMatrix();
 	glLoadIdentity();
+	
 	renderBitmapString(10.0, 10.0, 0.0, GLUT_BITMAP_TIMES_ROMAN_10, count_frame_str);		//FPS
-
-	s_1 = "x= " + std::to_string(g_x) + "   y= " + std::to_string(g_y) + "   z= " + std::to_string(zv) + "\t\t\t window\n";
-	s_2 = "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t windows to global\n";
-	s_3 = "x= " + std::to_string(wx_1) + "   y= " + std::to_string(wy_1) + "   z= " + std::to_string(wz_1) + "\t global to windows\n";
-	s_4 = std::to_string(zv);
-
 	renderBitmapString(10.0, 25.0, 0.0, GLUT_BITMAP_TIMES_ROMAN_10, s_3);
 	renderBitmapString(10.0, 40.0, 0.0, GLUT_BITMAP_TIMES_ROMAN_10, s_2);
 	renderBitmapString(10.0, 55.0, 0.0, GLUT_BITMAP_TIMES_ROMAN_10, s_1);
@@ -240,13 +245,15 @@ void renderScene(void) {
 }
 
 
-void processNormalKeys(unsigned char key, int x, int y) {
+void processNormalKeys(unsigned char key, int x, int y) 
+{
 	if (key == 27)
 		exit(0);
 }
 
 
-void processSpecialKeys(int key, int x, int y) {
+void processSpecialKeys(int key, int x, int y) 
+{
 	switch (key) {
 	case GLUT_KEY_F1:
 		flag = 0;
@@ -261,16 +268,10 @@ void processSpecialKeys(int key, int x, int y) {
 }
 
 
-void mouseButton(int button, int state, int x, int y) {
-
-	// только при начале движения, если нажата левая кнопка
+void mouseButton(int button, int state, int x, int y) 
+{
 	if (button == GLUT_LEFT_BUTTON) {
 		if (state == GLUT_DOWN) {
-			//count_frame_str = "x= " + std::to_string(x) + "   y= " + std::to_string(y);
-
-			flag_2 = 1;
-			g_x = x;
-			g_y = y;
 
 		}
 	}
@@ -285,51 +286,11 @@ void mouse(int x, int y)
 {
 	g_x = x;
 	g_y = y;
-
-	/*
-	for (auto i : str)
-	{
-		i = "";
-	}
-	*/
-	/*
-	// ------------------------------------
-	//setOrthographicProjection2D(-1, 1, -1, 1); 
-	setOrthographicProjection3D(-1, 1, -1, 1, 0, 100);
-	glPushMatrix();
-	glLoadIdentity();
-
-
-	//GLfloat zv = 0;
-
-
-	
-
-	//s_1 = "x= " + std::to_string(x) + "   y= " + std::to_string(y) + "   z= " + std::to_string(zv) + "\t\t\t window\n";
-	//str.push_back("x= " + std::to_string(x) + "   y= " + std::to_string(y) + "   z= " + std::to_string(zv) + "\t\t\t window\n");
-
-	glGetIntegerv(GL_VIEWPORT, viewport);
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-	glGetDoublev(GL_PROJECTION_MATRIX, projection);
-
-	gluUnProject(x, y, zv, modelview, projection, viewport, &wx, &wy, &wz);
-	//s_2 = "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t windows to global\n";
-	//str.push_back("x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t windows to global\n");
-
-	gluProject(wx, wy, wz, modelview, projection, viewport, &wx, &wy, &wz);
-	//s_3 = "x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t global to windows\n";
-	//str.push_back("x= " + std::to_string(wx) + "   y= " + std::to_string(wy) + "   z= " + std::to_string(wz) + "\t global to windows\n");
-
-	glPopMatrix();
-	restorePerspectiveProjection();
-	//-----------------------------------	
-	*/
 }
 
 
 void Timer(int)
 {
-
 	glutPostRedisplay();
 	glutTimerFunc(40, Timer, 0);
 }
