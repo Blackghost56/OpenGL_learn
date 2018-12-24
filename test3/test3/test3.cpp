@@ -6,7 +6,13 @@
 
 #include <iostream>
 
-Engine *engine;
+#define	FRAME_TIME_MS 40
+
+//Engine engi;
+//Engine *engine = &engi;
+//Engine *engine;
+Engine *engine = new Engine();
+
 
 void reshape(int width, int height)
 {
@@ -19,19 +25,28 @@ void render(void)
 	engine->Draw();
 }
 
+void timer(int val)
+{
+	glutPostRedisplay();
+	glutTimerFunc(FRAME_TIME_MS, timer, val);
+}
 
 int main(int argc, char** argv)
 {
-	engine = new Engine();
-
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(800, 200);
 	glutInitWindowSize(500, 500);
 	glutCreateWindow("Test_3");
-	
+	//engine = new Engine();
+	engine->Init();
+	//engine->Light();
+
 	glutDisplayFunc(render);
 	glutReshapeFunc(reshape);
+
+	//glutIdleFunc(render);
+	glutTimerFunc(FRAME_TIME_MS, timer, 0);
 
 	glutMainLoop();
 
