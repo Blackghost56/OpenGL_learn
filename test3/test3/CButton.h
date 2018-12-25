@@ -8,13 +8,13 @@
 class CButton
 {
 private:
-	struct Point_coord {		
+	struct TPoint_coord {		
 		int Point_1[2];			// x , y
 		int Point_2[2];			
 		int Point_3[2];
 		int Point_4[2];
 	};
-	Point_coord *coord = new Point_coord;
+	TPoint_coord *coord = new TPoint_coord;
 	int pos_x;
 	int pos_y;
 	int width;
@@ -27,6 +27,7 @@ private:
 
 	void coord_calc(const int &x, const int &y, const int &width, const int &height);
 	bool check_entry(const int &x, const int &y);
+	void render_text(const TPoint_coord *button_cord, const std::string &text, const float *text_color);
 
 public:
 	CButton();

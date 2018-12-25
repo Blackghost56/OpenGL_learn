@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Engine.h"
 
-CButton *button_1 = new CButton(0, 0, 200, 100, "Text 1\n");
+CButton *button_1 = new CButton(0, 0, 200, 100, "Text 1");
 
 
 Engine::Engine()
@@ -175,17 +175,70 @@ void Engine::renderBitmapString_3i(const int & x, const int & y, const int & z, 
 	}
 }
 
-void Engine::renderStrokeString_3i(const int & x, const int & y, const int & z, void *font, const std::string &string)
+void Engine::renderStrokeString_3D(const Engine::TTransformf &transform, void * font, const std::string & string)
 {
-	//glPushMatrix();
-	//glTranslatef(x, y, z);
+	glPushMatrix();
+	glTranslatef(transform.Translate.x, transform.Translate.y, transform.Translate.z);
+	glRotatef(transform.Rotate.angle, transform.Rotate.x, transform.Rotate.y, transform.Rotate.z);
+	glScalef(transform.Scale.x, transform.Scale.y, transform.Scale.z);
 
-	//for (auto i : string)
-	//{
-	//	glutStrokeCharacter(font, 47);
-	//}
+	for (auto i : string)
+	{
+		glutStrokeCharacter(font, i);
+	}
 
-	//glPopMatrix();
+	glPopMatrix();
 }
+
+void Engine::renderStrokeString_2D(const float &x, const float &y, const float &scale_x, const float &scale_y, const float &angle, void *font, const std::string &string)
+{
+	TTransformf transform;
+
+	transform.Translate.x = x;
+	transform.Translate.y = y;
+	transform.Translate.z = 0.0;
+	transform.Rotate.angle = angle;
+	transform.Rotate.x = 0.0;
+	transform.Rotate.y = 0.0;
+	transform.Rotate.z = 1.0;
+	transform.Scale.x = scale_x;
+	transform.Scale.y = scale_y;
+	transform.Scale.z = 1.0;
+
+	renderStrokeString_3D(transform, font, string);
+}
+
+void Engine::renderStrokeString_2D_smart(const float & x, const float & y, const float & width, const float & height, const float & angle, void * font, const std::string & string)
+{
+	float scale_width = 1.0;
+	float scale_height = 1.0;
+	int string_width = 0;
+	float string_height = 100.0;
+
+	string_width = StrokeStringWidth(font, string);
+	if (width != 0)
+	{
+		scale_width = width / (float)string_width;
+	}
+	if (height != 0)
+	{
+		scale_height = height / string_height;
+	}
+
+	renderStrokeString_2D(x, y, scale_width, scale_height, angle, font, string);
+}
+
+int Engine::StrokeStringWidth(void * font, const std::string & string)
+{
+	int count = 0;
+
+	for (auto i : string)
+	{
+		count += glutStrokeWidth(font, i);
+	}
+
+	return count;
+}
+
 
 

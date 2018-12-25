@@ -27,6 +27,13 @@ bool CButton::check_entry(const int &x, const int &y)
 	return false;
 }
 
+void CButton::render_text(const TPoint_coord *button_cord, const std::string &text, const float *text_color)
+{
+	glColor3fv(text_color);
+
+	engine->renderStrokeString_2D_smart(0, 0, 100, 50, 0, GLUT_STROKE_ROMAN, text);
+}
+
 CButton::CButton()
 {
 	this->pos_x = 0;
@@ -172,15 +179,32 @@ void CButton::Draw(void)
 		glVertex2iv(coord->Point_4);
 		glEnd();
 
-		glColor3fv(text_color);
+		
 		//  Заменить растровый текст на glutStrokeCharacter
-		unsigned char texts[] = "Text 1";
-		std::cout << glutBitmapLength(GLUT_BITMAP_TIMES_ROMAN_10, texts) << std::endl;
+		render_text(coord, text, text_color);
+		//std::cout << engine->StrokeStringWidth(GLUT_STROKE_MONO_ROMAN, text) << std::endl;
+		/*
+		Engine::TTransformf trans;
+		trans.Scale.x = 0.5;
+		trans.Scale.y = 0.5;
+		trans.Scale.z = 1.0;
+		trans.Translate.x = 100.0;
+		trans.Translate.y = 100.0;
+		trans.Translate.z = 0.0;
+		trans.Rotate.angle = 45.0;
+		trans.Rotate.z = 1.0;*/
+		//engine->renderStrokeString_3D(trans, GLUT_STROKE_MONO_ROMAN, text);
 
+		//engine->renderStrokeString_2D(100, 100, 0.5, 0.5, 45, GLUT_STROKE_MONO_ROMAN, text);
+
+		//engine->renderStrokeString_2D_smart(0, 0, 200, 200, 0, GLUT_STROKE_MONO_ROMAN, text);
+		//engine->renderStrokeString_2D_smart(0, 0, 100, 50, 0, GLUT_STROKE_ROMAN, text);
+		
 		//engine->renderBitmapString_3i(10, 10, 0, GLUT_BITMAP_TIMES_ROMAN_10, text);
-		engine->renderStrokeString_3i(10, 10, 0, GLUT_BITMAP_TIMES_ROMAN_10, text);
+		//engine->renderStrokeString(100.0, 100.0, 0, GLUT_STROKE_MONO_ROMAN, text);
 
 		engine->restorePerspectiveProjection_Mi();
+
 	}
 	else
 	{

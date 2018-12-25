@@ -9,7 +9,42 @@ private:
 	int window_width;
 	int window_height;
 
+	int StrokeStringWidth(void *font, const std::string &string);
+
+
 public:
+	//struct TTransformf;
+	struct TTransformf {
+		TTransformf() {
+			Translate.x = 0.0;
+			Translate.y = 0.0;
+			Translate.z = 0.0;
+			Scale.x = 1.0;
+			Scale.y = 1.0;
+			Scale.z = 1.0;
+			Rotate.angle = 0.0;
+			Rotate.x = 0.0;
+			Rotate.y = 0.0;
+			Rotate.z = 0.0;
+		}
+		struct Tr {
+			float x;
+			float y;
+			float z;
+		} Translate;
+		struct Ro {
+			float angle;
+			float x;
+			float y;
+			float z;
+		} Rotate;
+		struct Sc {
+			float x;
+			float y;
+			float z;
+		} Scale;
+	};
+	
 	Engine();
 	~Engine();
 	int getWindow_width(void);
@@ -26,7 +61,13 @@ public:
 	void restorePerspectiveProjection_Mi();
 	void renderBitmapString_3f(const float &x, const float &y, const float &z, void *font, const std::string &string);
 	void renderBitmapString_3i(const int &x, const int &y, const int &z, void *font, const std::string &string);
-	void renderStrokeString_3i(const int &x, const int &y, const int &z, void *font, const std::string &string);
+	void renderStrokeString_3D(const Engine::TTransformf &transform, void * font, const std::string & string);
+	void renderStrokeString_2D(const float &x, const float &y, const float &scale_x, const float &scale_y, const float &angle, void *font, const std::string &string);
+	void renderStrokeString_2D_smart(const float &x, const float &y, const float &width, const float &height, const float &angle, void *font, const std::string &string);
+	
+
+
+
 
 };
 
