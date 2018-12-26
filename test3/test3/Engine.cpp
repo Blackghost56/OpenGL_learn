@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Engine.h"
 
-CButton *button_1 = new CButton(0, 0, 200, 100, "Text 1");
+CButton *button_1 = new CButton(100, 100, 200, 100, "Button 1", 20);
 
 
 Engine::Engine()
@@ -99,6 +99,25 @@ void Engine::Light(void)
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);//спереди и сзади, ведь предмет анимированый, потом указываем, что свет и диффузный и рассеянный
 	*/
 }
+
+
+
+void Engine::MouseFunc(int button, int state, int x, int y, void(*f)(void))
+{
+	if (button == GLUT_LEFT_BUTTON) {
+		if (state == GLUT_DOWN) {
+			button_1->Click_Handle(x, window_height - y, f);
+	
+		}
+	}
+	if (button == GLUT_RIGHT_BUTTON) {
+		if (state == GLUT_DOWN) {
+
+		}
+	}
+}
+
+
 
 void Engine::setOrthographicProjection3D(int left, int right, int bottom, int top, int o_near, int o_far) 
 {
@@ -213,7 +232,7 @@ void Engine::renderStrokeString_2D_smart(const float & x, const float & y, const
 	float scale_width = 1.0;
 	float scale_height = 1.0;
 	int string_width = 0;
-	float string_height = 100.0;
+	float string_height = (float)Stroke_text_height;
 
 	string_width = StrokeStringWidth(font, string);
 	if (width != 0)
@@ -228,6 +247,18 @@ void Engine::renderStrokeString_2D_smart(const float & x, const float & y, const
 	renderStrokeString_2D(x, y, scale_width, scale_height, angle, font, string);
 }
 
+void Engine::renderStrokeString_2D_font(const float & x, const float & y, const float & angle, void * font, const float & font_size, const std::string & string)
+{
+	float scale = 1.0;
+
+	if (font_size != 0)
+	{
+		scale = (float)font_size / (float)Stroke_text_height;
+	}
+
+	renderStrokeString_2D(x, y, scale, scale, angle, font, string);
+}
+
 int Engine::StrokeStringWidth(void * font, const std::string & string)
 {
 	int count = 0;
@@ -239,6 +270,7 @@ int Engine::StrokeStringWidth(void * font, const std::string & string)
 
 	return count;
 }
+
 
 
 

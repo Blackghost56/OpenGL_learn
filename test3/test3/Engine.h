@@ -3,13 +3,15 @@
 #include "api.h"
 #include "CButton.h"
 
+const int Stroke_text_height = 100;
+
 class Engine
 {
 private:
 	int window_width;
 	int window_height;
 
-	int StrokeStringWidth(void *font, const std::string &string);
+	
 
 
 public:
@@ -53,6 +55,8 @@ public:
 	void Reshape(int width, int height);
 	void Init(void);
 	void Light(void);
+	void MouseFunc(int button, int state, int x, int y, void (*f)(void));
+	
 	void setOrthographicProjection3D(int left, int right, int bottom, int top, int o_near, int o_far);
 	void setOrthographicProjection3D_Mi(int left, int right, int bottom, int top, int o_near, int o_far);
 	void setOrthographicProjection2D(int w_down, int w_up, int h_down, int h_up);
@@ -64,8 +68,10 @@ public:
 	void renderStrokeString_3D(const Engine::TTransformf &transform, void * font, const std::string & string);
 	void renderStrokeString_2D(const float &x, const float &y, const float &scale_x, const float &scale_y, const float &angle, void *font, const std::string &string);
 	void renderStrokeString_2D_smart(const float &x, const float &y, const float &width, const float &height, const float &angle, void *font, const std::string &string);
+	void renderStrokeString_2D_font(const float &x, const float &y, const float &angle, void *font, const float &font_size, const std::string &string);
+	int StrokeStringWidth(void *font, const std::string &string);
 	
-
+	
 
 
 

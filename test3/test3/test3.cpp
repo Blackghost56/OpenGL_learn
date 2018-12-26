@@ -31,6 +31,18 @@ void timer(int val)
 	glutTimerFunc(FRAME_TIME_MS, timer, val);
 }
 
+void foo(void)
+{
+	static int count = 0;
+	count++;
+	std::cout << "Click foo main#" << count << std::endl;
+}
+
+void mouseButton(int button, int state, int x, int y)
+{
+	engine->MouseFunc(button, state, x, y, &foo);
+}
+
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
@@ -47,6 +59,8 @@ int main(int argc, char** argv)
 
 	//glutIdleFunc(render);
 	glutTimerFunc(FRAME_TIME_MS, timer, 0);
+
+	glutMouseFunc(mouseButton);
 
 	glutMainLoop();
 

@@ -27,11 +27,39 @@ bool CButton::check_entry(const int &x, const int &y)
 	return false;
 }
 
-void CButton::render_text(const TPoint_coord *button_cord, const std::string &text, const float *text_color)
+void CButton::text_update(const TPoint_coord *button_cord, TText_container *text)
 {
-	glColor3fv(text_color);
+	int x = 0;
+	int y = 0;
+	int centre_x = 0;
+	int centre_y = 0;
+	float text_length = (float)engine->StrokeStringWidth(text->font, text->text) * ((float)text->font_size / (float)Stroke_text_height);
 
-	engine->renderStrokeString_2D_smart(0, 0, 100, 50, 0, GLUT_STROKE_ROMAN, text);
+	centre_x = (button_cord->Point_2[0] - button_cord->Point_1[0]) / 2 + button_cord->Point_1[0];
+	centre_y = (button_cord->Point_4[1] - button_cord->Point_1[1]) / 2 + button_cord->Point_1[1];
+
+	x = centre_x - (text_length / 2.0);
+	y = centre_y - ((float)text->font_size / 2.0);
+	
+	if ((x > button_cord->Point_1[0]) && (y > button_cord->Point_1[1]))
+	{
+		text->x = x;
+		text->y = y;
+	}
+	else
+	{
+		text->x = button_cord->Point_1[0];
+		text->y = button_cord->Point_1[1];
+		text->text = "Err. Lenghth";
+	}
+	
+	
+	/*std::cout << "text_length    " << text_length << std::endl;
+	std::cout << "centre_x    " << centre_x << std::endl;
+	std::cout << "centre_y    " << centre_y << std::endl;
+	std::cout << "text->x    " << text->x << std::endl;
+	std::cout << "text->y    " << text->y << std::endl;*/
+
 }
 
 CButton::CButton()
@@ -40,57 +68,65 @@ CButton::CButton()
 	this->pos_y = 0;
 	this->width = 0;
 	this->height = 0;
-	this->text = "";
 	this->state = false;
 	this->setButtonColor(0.5, 0.5, 0.5);		// def set gray
-	this->setTextColor(0.0, 0.0, 0.0);			// def set black
+	//this->setTextColor(0.0, 0.0, 0.0);			// def set black
 	coord_calc(this->pos_x, this->pos_y, this->width, this->height);
+	text_update(coord, this->text);
 }
 
-CButton::CButton(const int &x, const int &y, const int &width, const int &height, const std::string &text)
+CButton::CButton(const int &x, const int &y, const int &width, const int &height, const std::string &text, const int font_size)
 {
 	this->pos_x = x;
 	this->pos_y = y;
 	this->width = width;
 	this->height = height;
-	this->text = text;
+	this->text->text = text;
 	this->state = false;
 	this->setButtonColor(0.5, 0.5, 0.5);		// def set gray
-	this->setTextColor(0.0, 0.0, 0.0);			// def set black
+	//this->setTextColor(0.0, 0.0, 0.0);			// def set black
+	this->text->font_size = font_size;
 	coord_calc(this->pos_x, this->pos_y, this->width, this->height);
+	text_update(coord, this->text);
 }
 
 CButton::~CButton()
 {
+		
 }
 
 void CButton::setX(const int &x)
 {
 	this->pos_x = x;
 	coord_calc(this->pos_x, this->pos_y, this->width, this->height);
+	text_update(coord, text);
 }
 
 void CButton::setY(const int &y)
 {
 	this->pos_y = y;
 	coord_calc(this->pos_x, this->pos_y, this->width, this->height);
+	text_update(coord, text);
 }
 
 void CButton::setWidth(const int &width)
 {
 	this->width = width;
 	coord_calc(this->pos_x, this->pos_y, this->width, this->height);
+	text_update(coord, text);
 }
 
 void CButton::setHeight(const int &height)
 {
 	this->height = height;
 	coord_calc(this->pos_x, this->pos_y, this->width, this->height);
+	text_update(coord, text);
 }
 
 void CButton::setText(const std::string &text)
 {
-	this->text = text;
+	this->text->text = text;
+	text_update(coord, this->text);
 }
 
 void CButton::setState(const bool &state)
@@ -114,16 +150,28 @@ void CButton::setButtonColor(float * color_3f)
 
 void CButton::setTextColor(const float & r, const float & g, const float & b)
 {
-	this->text_color[0] = r;
-	this->text_color[1] = g;
-	this->text_color[2] = b;
+	this->text->text_color[0] = r;
+	this->text->text_color[1] = g;
+	this->text->text_color[2] = b;
 }
 
 void CButton::setTextColor(float * color_3f)
 {
-	this->text_color[0] = color_3f[0];
-	this->text_color[1] = color_3f[1];
-	this->text_color[2] = color_3f[2];
+	this->text->text_color[0] = color_3f[0];
+	this->text->text_color[1] = color_3f[1];
+	this->text->text_color[2] = color_3f[2];
+}
+
+void CButton::setFont(void * font)
+{
+	this->text->font = font;
+	text_update(coord, text);
+}
+
+void CButton::setFontSize(int &size)
+{
+	this->text->font_size = size;
+	text_update(coord, text);
 }
 
 int CButton::getX(void)
@@ -148,7 +196,7 @@ int CButton::getHeight(void)
 
 std::string CButton::getText(void)
 {
-	return this->text;
+	return this->text->text;
 }
 
 bool CButton::getState(void)
@@ -163,13 +211,23 @@ float * CButton::getButtonColor(void)
 
 float * CButton::getTextColor(void)
 {
-	return text_color;
+	return text->text_color;
+}
+
+void * CButton::getFont(void)
+{
+	return this->text->font;
+}
+
+int CButton::getFontSize(void)
+{
+	return this->text->font_size;
 }
 
 void CButton::Draw(void)
 {
-	if (!state)
-	{
+	//if (!state)
+	//{
 		engine->setOrthographicProjection2D_Mi(0, engine->getWindow_width(), 0, engine->getWindow_height());
 		glColor3fv(button_color);
 		glBegin(GL_TRIANGLE_FAN);
@@ -179,42 +237,34 @@ void CButton::Draw(void)
 		glVertex2iv(coord->Point_4);
 		glEnd();
 
-		
-		//  Заменить растровый текст на glutStrokeCharacter
-		render_text(coord, text, text_color);
-		//std::cout << engine->StrokeStringWidth(GLUT_STROKE_MONO_ROMAN, text) << std::endl;
-		/*
-		Engine::TTransformf trans;
-		trans.Scale.x = 0.5;
-		trans.Scale.y = 0.5;
-		trans.Scale.z = 1.0;
-		trans.Translate.x = 100.0;
-		trans.Translate.y = 100.0;
-		trans.Translate.z = 0.0;
-		trans.Rotate.angle = 45.0;
-		trans.Rotate.z = 1.0;*/
-		//engine->renderStrokeString_3D(trans, GLUT_STROKE_MONO_ROMAN, text);
-
-		//engine->renderStrokeString_2D(100, 100, 0.5, 0.5, 45, GLUT_STROKE_MONO_ROMAN, text);
-
-		//engine->renderStrokeString_2D_smart(0, 0, 200, 200, 0, GLUT_STROKE_MONO_ROMAN, text);
-		//engine->renderStrokeString_2D_smart(0, 0, 100, 50, 0, GLUT_STROKE_ROMAN, text);
-		
-		//engine->renderBitmapString_3i(10, 10, 0, GLUT_BITMAP_TIMES_ROMAN_10, text);
-		//engine->renderStrokeString(100.0, 100.0, 0, GLUT_STROKE_MONO_ROMAN, text);
+		glColor3fv(text->text_color);
+		engine->renderStrokeString_2D_font(text->x, text->y, 0, text->font, text->font_size, text->text);
 
 		engine->restorePerspectiveProjection_Mi();
 
-	}
-	else
-	{
+	//}
+	//else
+	//{
 
-	}
+	//}
 }
 
-bool CButton::Click_Handle(int x, int y)
+bool CButton::Click_Handle(int x, int y, void (*f)(void))
 {
 	state = check_entry(x, y);
 
+	//std::cout << "x " << x <<  std::endl;
+	//std::cout << "y " << y << std::endl;
+	//static int count = 0;
+	//count++;
+	//std::cout << "Click #" << count << "State   " << state << std::endl;
+	//f();
+	if (state)
+	{
+		f();
+	}
+
 	return state;
 }
+
+
