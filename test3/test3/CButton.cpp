@@ -64,26 +64,32 @@ void CButton::text_update(const TPoint_coord *button_cord, TText_container *text
 
 CButton::CButton()
 {
+	this->id = 0;
 	this->pos_x = 0;
 	this->pos_y = 0;
 	this->width = 0;
 	this->height = 0;
 	this->state = false;
-	this->setButtonColor(0.5, 0.5, 0.5);		// def set gray
+	mouse_state = MOUSE_UP;
+	this->setButtonColorUp(0.5, 0.5, 0.5);		// def set gray
+	this->setButtonColorDown(0.4, 0.4, 0.4);
 	//this->setTextColor(0.0, 0.0, 0.0);			// def set black
 	coord_calc(this->pos_x, this->pos_y, this->width, this->height);
 	text_update(coord, this->text);
 }
 
-CButton::CButton(const int &x, const int &y, const int &width, const int &height, const std::string &text, const int font_size)
+CButton::CButton(const int &id, const int &x, const int &y, const int &width, const int &height, const std::string &text, const int font_size)
 {
+	this->id = id;
 	this->pos_x = x;
 	this->pos_y = y;
 	this->width = width;
 	this->height = height;
 	this->text->text = text;
 	this->state = false;
-	this->setButtonColor(0.5, 0.5, 0.5);		// def set gray
+	mouse_state = MOUSE_UP;
+	this->setButtonColorUp(0.5, 0.5, 0.5);		// def set gray
+	this->setButtonColorDown(0.4, 0.4, 0.4);
 	//this->setTextColor(0.0, 0.0, 0.0);			// def set black
 	this->text->font_size = font_size;
 	coord_calc(this->pos_x, this->pos_y, this->width, this->height);
@@ -93,6 +99,11 @@ CButton::CButton(const int &x, const int &y, const int &width, const int &height
 CButton::~CButton()
 {
 		
+}
+
+void CButton::setId(int & id)
+{
+	this->id = id;
 }
 
 void CButton::setX(const int &x)
@@ -134,18 +145,32 @@ void CButton::setState(const bool &state)
 	this->state = state;
 }
 
-void CButton::setButtonColor(const float &r, const float &g, const float &b)
+void CButton::setButtonColorUp(const float &r, const float &g, const float &b)
 {
-	this->button_color[0] = r;
-	this->button_color[1] = g;
-	this->button_color[2] = b;
+	this->button_color_up[0] = r;
+	this->button_color_up[1] = g;
+	this->button_color_up[2] = b;
 }
 
-void CButton::setButtonColor(float * color_3f)
+void CButton::setButtonColorUp(float * color_3f)
 {
-	this->button_color[0] = color_3f[0];
-	this->button_color[1] = color_3f[1];
-	this->button_color[2] = color_3f[2];
+	this->button_color_up[0] = color_3f[0];
+	this->button_color_up[1] = color_3f[1];
+	this->button_color_up[2] = color_3f[2];
+}
+
+void CButton::setButtonColorDown(const float & r, const float & g, const float & b)
+{
+	this->button_color_down[0] = r;
+	this->button_color_down[1] = g;
+	this->button_color_down[2] = b;
+}
+
+void CButton::setButtonColorDown(float * color_3f)
+{
+	this->button_color_down[0] = color_3f[0];
+	this->button_color_down[1] = color_3f[1];
+	this->button_color_down[2] = color_3f[2];
 }
 
 void CButton::setTextColor(const float & r, const float & g, const float & b)
@@ -172,6 +197,11 @@ void CButton::setFontSize(int &size)
 {
 	this->text->font_size = size;
 	text_update(coord, text);
+}
+
+int CButton::getId(void)
+{
+	return this->id;
 }
 
 int CButton::getX(void)
@@ -204,9 +234,14 @@ bool CButton::getState(void)
 	return this->state;
 }
 
-float * CButton::getButtonColor(void)
+float * CButton::getButtonColorUp(void)
 {
-	return button_color;
+	return button_color_up;
+}
+
+float * CButton::getButtonColorDown(void)
+{
+	return button_color_down;
 }
 
 float * CButton::getTextColor(void)
@@ -226,10 +261,10 @@ int CButton::getFontSize(void)
 
 void CButton::Draw(void)
 {
-	//if (!state)
-	//{
+	if (mouse_state == MOUSE_UP)
+	{
 		engine->setOrthographicProjection2D_Mi(0, engine->getWindow_width(), 0, engine->getWindow_height());
-		glColor3fv(button_color);
+		glColor3fv(button_color_up);
 		glBegin(GL_TRIANGLE_FAN);
 		glVertex2iv(coord->Point_1);
 		glVertex2iv(coord->Point_2);
@@ -242,14 +277,26 @@ void CButton::Draw(void)
 
 		engine->restorePerspectiveProjection_Mi();
 
-	//}
-	//else
-	//{
+	}
+	else
+	{
+		engine->setOrthographicProjection2D_Mi(0, engine->getWindow_width(), 0, engine->getWindow_height());
+		glColor3fv(button_color_down);
+		glBegin(GL_TRIANGLE_FAN);
+		glVertex2iv(coord->Point_1);
+		glVertex2iv(coord->Point_2);
+		glVertex2iv(coord->Point_3);
+		glVertex2iv(coord->Point_4);
+		glEnd();
 
-	//}
+		glColor3fv(text->text_color);
+		engine->renderStrokeString_2D_font(text->x, text->y, 0, text->font, text->font_size, text->text);
+
+		engine->restorePerspectiveProjection_Mi();
+	}
 }
 
-bool CButton::Click_Handle(int x, int y, void (*f)(void))
+bool CButton::Click_Handle(int mouse_state, int x, int y, void(*f)(int button_id))
 {
 	state = check_entry(x, y);
 
@@ -261,7 +308,11 @@ bool CButton::Click_Handle(int x, int y, void (*f)(void))
 	//f();
 	if (state)
 	{
-		f();
+		this->mouse_state = mouse_state;
+		if (mouse_state == GLUT_DOWN)
+		{
+			f(this->id);
+		}
 	}
 
 	return state;

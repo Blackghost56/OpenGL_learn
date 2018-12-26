@@ -6,7 +6,8 @@
 
 #include <iostream>
 
-#define	FRAME_TIME_MS 40
+#define FPS				25
+#define	FRAME_TIME_MS	1000 / FPS
 
 //Engine engi;
 //Engine *engine = &engi;
@@ -31,11 +32,22 @@ void timer(int val)
 	glutTimerFunc(FRAME_TIME_MS, timer, val);
 }
 
-void foo(void)
+void foo(int button_id)
 {
 	static int count = 0;
 	count++;
-	std::cout << "Click foo main#" << count << std::endl;
+	std::cout << "Click button_id " << button_id << " #" << count << std::endl;
+	switch (button_id)
+	{
+	case 0:
+		glClearColor(0.2f, 0.5f, 0.75f, 1.0f);
+		break;
+	case 1:
+		glClearColor(0.5f, 0.5f, 0.75f, 1.0f);
+		break;
+	default:
+		break;
+	}
 }
 
 void mouseButton(int button, int state, int x, int y)

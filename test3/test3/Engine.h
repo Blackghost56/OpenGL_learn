@@ -55,7 +55,7 @@ public:
 	void Reshape(int width, int height);
 	void Init(void);
 	void Light(void);
-	void MouseFunc(int button, int state, int x, int y, void (*f)(void));
+	void MouseFunc(int button, int state, int x, int y, void (*f)(int button_id));
 	
 	void setOrthographicProjection3D(int left, int right, int bottom, int top, int o_near, int o_far);
 	void setOrthographicProjection3D_Mi(int left, int right, int bottom, int top, int o_near, int o_far);

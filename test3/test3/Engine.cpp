@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "Engine.h"
 
-CButton *button_1 = new CButton(100, 100, 200, 100, "Button 1", 20);
-
+CButton *button_1 = new CButton(0, 100, 100, 200, 100, "Button 1", 20);
+CButton *button_2 = new CButton(1, 100, 300, 200, 100, "Button 2", 20);
 
 Engine::Engine()
 {
@@ -39,6 +39,7 @@ void Engine::Draw(void)
 	glEnd();
 
 	button_1->Draw();
+	button_2->Draw();
 
 	glutSwapBuffers();
 }
@@ -102,12 +103,18 @@ void Engine::Light(void)
 
 
 
-void Engine::MouseFunc(int button, int state, int x, int y, void(*f)(void))
+void Engine::MouseFunc(int button, int state, int x, int y, void(*f)(int button_id))
 {
 	if (button == GLUT_LEFT_BUTTON) {
 		if (state == GLUT_DOWN) {
-			button_1->Click_Handle(x, window_height - y, f);
+			button_1->Click_Handle(state, x, window_height - y, f);
+			button_2->Click_Handle(state, x, window_height - y, f);
 	
+		}
+		if (state == GLUT_UP) {
+			button_1->Click_Handle(state, x, window_height - y, f);
+			button_2->Click_Handle(state, x, window_height - y, f);
+
 		}
 	}
 	if (button == GLUT_RIGHT_BUTTON) {

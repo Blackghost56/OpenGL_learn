@@ -5,30 +5,21 @@
 
 #include <iostream>				// debug
 
+#define MOUSE_UP		true
+#define MOUSE_DOWN		false
+
 class CButton
 {
 private:
-	/*struct TText_border {
-	TText_border() {
-		top = 20;
-		down = 20;
-		left = 10;
-		right = 10;
-	};
-	int top;
-	int down;
-	int left;
-	int right;
-	} text_border;*/
-	
-
-
+	int id;
 	int pos_x;
 	int pos_y;
 	int width;
 	int height;
 	bool state;
-	float *button_color = new float[3];
+	bool mouse_state;
+	float *button_color_up = new float[3];
+	float *button_color_down = new float[3];
 	
 	struct TPoint_coord {
 		int Point_1[2];						// x , y
@@ -64,33 +55,38 @@ private:
 
 public:
 	CButton();
-	CButton(const int &x, const int &y, const int &width, const int &height, const std::string &text, const int font_size);
+	CButton(const int &id, const int &x, const int &y, const int &width, const int &height, const std::string &text, const int font_size);
 	~CButton();
+	void setId(int &id);
 	void setX(const int &x);
 	void setY(const int &y);
 	void setWidth(const int &width);
 	void setHeight(const int &height);
 	void setText(const std::string &text);
 	void setState(const bool &state);
-	void setButtonColor(const float &r, const float &g, const float &b);
-	void setButtonColor(float *color_3f);
+	void setButtonColorUp(const float &r, const float &g, const float &b);
+	void setButtonColorUp(float *color_3f);
+	void setButtonColorDown(const float &r, const float &g, const float &b);
+	void setButtonColorDown(float *color_3f);
 	void setTextColor(const float &r, const float &g, const float &b);
 	void setTextColor(float *color_3f);
 	void setFont(void *font);
 	void setFontSize(int &size);
+	int getId(void);
 	int getX(void);
 	int getY(void);
 	int getWidth(void);
 	int getHeight(void);
 	std::string getText(void);
 	bool getState(void);
-	float *getButtonColor(void);
+	float *getButtonColorUp(void);
+	float *getButtonColorDown(void);
 	float *getTextColor(void);
 	void *getFont(void);
 	int getFontSize(void);
 
 	void Draw(void);
-	bool Click_Handle(int x, int y, void (*f)(void));
+	bool Click_Handle(int mouse_state, int x, int y, void (*f)(int button_id));
 	
 };
 
